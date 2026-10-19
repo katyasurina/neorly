@@ -3,8 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { SUPPORTED_MIME_TYPES, SupportedMime } from '@/lib/parsers';
 
-export const runtime = 'nodejs';
-
 const BUCKET = 'packs';
 
 export async function GET() {
