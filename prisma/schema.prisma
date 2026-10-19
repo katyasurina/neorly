@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  name       String?
+  createdAt  DateTime @default(now())
+  packs      Pack[]
+  reviewLogs ReviewLog[]
+}
+
+enum PackStatus {
+  PROCESSING
+  READY
+  FAILED
+}
+
+model Pack {
+  id            String       @id @default(cuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  sourceFile    String?
+  sourceMime    String?
+  status        PackStatus   @default(PROCESSING)
+  errorMessage  String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  notes         Note[]
+  flashcards    Flashcard[]
+  quizQuestions QuizQuestion[]
+  sessions      StudySession[]
+
+  @@index([userId, createdAt])
+}
+
+model Note {
+  id      String @id @default(cuid())
+  packId  String
+  pack    Pack   @relation(fields: [packId], references: [id], onDelete: Cascade)
+  title   String
+  content String
+  order   Int
+
+  @@index([packId, order])
+}
+
+model Flashcard {
+  id           String    @id @default(cuid())
+  packId       String
+  pack         Pack      @relation(fields: [packId], references: [id], onDelete: Cascade)
+  front        String
+  back         String
+  tags         String[]  @default([])
+  easeFactor   Float     @default(2.5)
+  interval     Int       @default(0)
+  repetitions  Int       @default(0)
+  dueAt        DateTime  @default(now())
+  lastReviewed DateTime?
+  reviews      ReviewLog[]
+
+  @@index([packId])
+  @@index([packId, dueAt])
+}
+
+model QuizQuestion {
+  id           String  @id @default(cuid())
+  packId       String
+  pack         Pack    @relation(fields: [packId], references: [id], onDelete: Cascade)
+  question     String
+  options      String[]
+  correctIndex Int
+  explanation  String?
+
+  @@index([packId])
+}
+
+model StudySession {
+  id           String    @id @default(cuid())
+  packId       String
+  pack         Pack      @relation(fields: [packId], references: [id], onDelete: Cascade)
+  startedAt    DateTime  @default(now())
+  finishedAt   DateTime?
+  cardsSeen    Int       @default(0)
+  cardsCorrect Int       @default(0)
+
+  @@index([packId])
+}
+
+model ReviewLog {
+  id         String    @id @default(cuid())
+  cardId     String
+  card       Flashcard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating     Int
+  reviewedAt DateTime  @default(now())
+
+  @@index([userId, reviewedAt])
+}
