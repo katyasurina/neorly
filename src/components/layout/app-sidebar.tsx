@@ -1,0 +1,51 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { LayoutDashboard, Upload, Library, Brain, BarChart3, Settings, LogOut } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const links = [
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Upload', href: '/upload', icon: Upload },
+  { label: 'Library', href: '/library', icon: Library },
+  { label: 'Review', href: '/review', icon: Brain },
+  { label: 'Progress', href: '/progress', icon: BarChart3 },
+  { label: 'Settings', href: '/settings', icon: Settings },
+];
+
+export function AppSidebar() {
+  const pathname = usePathname();
+
+  return (
+    <aside className="hidden md:flex w-64 flex-col border-r bg-background p-4">
+      <div className="mb-8 px-2">
+        <Link href="/dashboard" className="text-xl font-extrabold tracking-tight text-foreground">Neorly</Link>
+        <p className="text-xs text-muted-foreground">AI-помічник для навчання</p>
+      </div>
+      <nav className="flex-1 space-y-1">
+        {links.map((l) => {
+          const active = pathname === l.href || pathname.startsWith(l.href + '/');
+          return (
+            <Link
+              key={l.href}
+              href={l.href}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+              )}
+            >
+              <l.icon className="size-4" />
+              {l.label}
+            </Link>
+          );
+        })}
+      </nav>
+      <div className="mt-auto pt-4 border-t">
+        <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground">
+          <LogOut className="size-4" /> Вийти
+        </Link>
+      </div>
+    </aside>
+  );
+}
