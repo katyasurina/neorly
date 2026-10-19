@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Neorly — AI-помічник для навчання
 
-## Getting Started
+Невеликий SaaS-проєкт (портфоліо), який дозволяє завантажувати навчальні матеріали, генерувати структуровані конспекти, флешкартки та тести, а потім повторювати їх через алгоритм SM-2.
 
-First, run the development server:
+## Що зроблено (фундамент)
+
+- Next.js 15 (App Router, TypeScript, `src/`)
+- Tailwind CSS + shadcn/ui (nova preset)
+- Prisma ORM + Supabase Postgres
+- Supabase Auth (email/пароль) + Storage (bucket `packs`)
+- API routes для створення / отримання / видалення пакетів (`/api/packs`)
+- Парсери: PDF, DOCX, PPTX (jszip + fast-xml-parser), TXT
+- AI schemas + prompts (stub — реалізація LLM у наступному кроці)
+- SM-2 алгоритм повторення (`src/lib/srs/sm2.ts`)
+- Усі сторінки-заглушки + sidebar + upload UI
+
+## Як запустити локально
 
 ```bash
+git clone <url>
+cd neorly
+npm install
+# Створіть .env з тих самих ключів (see .env.example)
+# Створіть Supabase-проєкт: Database, Auth (email/password), Storage bucket `packs`
+# У bucket налаштуйте: public read, auth write
+npx prisma generate
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Supabase setup (коротко)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Зареєструйтеся на [supabase.com](https://supabase.com)
+2. Створіть проект → Database URL з `Project Settings > Database`
+3. У `Auth > Settings` ввімкніть Email provider
+4. У `Storage` створіть bucket `packs`
+5. У bucket `packs` → Policies: `SELECT` — `anon`/`authenticated`, `INSERT`/`UPDATE`/`DELETE` — `authenticated`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Деплой на Vercel
 
-## Learn More
+- Імпортуйте репозиторій у Vercel
+- Додайте Environment Variables з `.env.example`
+- Build командою: `npm run build`
 
-To learn more about Next.js, take a look at the following resources:
+## Що далі (roadmap)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [ ] Реалізувати `generate-pack.ts` (OpenAI / Anthropic structured output)
+- [ ] Інтегрувати парсер з API (`POST /api/packs` → parse → AI → save notes/flashcards/quiz)
+- [ ] Компонент `flashcard-session.tsx` + `quiz-runner.tsx`
+- [ ] Сторінка `/review` з алгоритмом SM-2
+- [ ] Прогрес-бари та статистика
+- [ ] (Позашаблон) AI-чат з RAG, mind maps, транскрипція — не на цьому етапі
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*Neorly — навчання через структуру.
+Co-Authored-By: Claude Code <noreply@anthropic.com>
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
