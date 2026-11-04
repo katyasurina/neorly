@@ -1,19 +1,52 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
-  const url = request.nextUrl;
-  const isAuthRoute = url.pathname === '/login' || url.pathname === '/register';
-  const isProtected = ['/dashboard', '/upload', '/library', '/review', '/progress', '/settings'].some((path) => url.pathname.startsWith(path));
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
 
-  if (isAuthRoute) {
-    return NextResponse.next();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // Оновлюємо сесію
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const url = request.nextUrl
+  const isAuthRoute = url.pathname === '/login' || url.pathname === '/register'
+  const isProtected = ['/dashboard', '/upload', '/library', '/review', '/progress', '/settings'].some((path) => url.pathname.startsWith(path))
+
+  if (isProtected && !user) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
-  if (isProtected) {
-    return NextResponse.next();
+
+  if (isAuthRoute && user) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
-  return NextResponse.next();
+
+  return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-};
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}

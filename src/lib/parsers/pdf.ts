@@ -1,5 +1,16 @@
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
+
 export async function parsePdf(buffer: Buffer): Promise<string> {
-  const pdfParse = (await import('pdf-parse')) as unknown as { default: (data: Buffer) => Promise<{ text: string }> };
-  const res = await pdfParse.default(buffer);
-  return res.text;
+  const uint8Array = new Uint8Array(buffer);
+  const loadingTask = pdfjs.getDocument({ data: uint8Array });
+  const pdf = await loadingTask.promise;
+
+  let fullText = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items.map((item: any) => item.str).join(' ');
+    fullText += pageText + '\n';
+  }
+  return fullText;
 }

@@ -34,10 +34,13 @@ model Pack {
   errorMessage  String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
-  notes         Note[]
-  flashcards    Flashcard[]
-  quizQuestions QuizQuestion[]
-  sessions      StudySession[]
+  notes             Note[]
+  flashcards        Flashcard[]
+  quizQuestions     QuizQuestion[]
+  sessions          StudySession[]
+  generateNotes     Boolean    @default(false)
+  generateFlashcards Boolean    @default(false)
+  generateQuiz      Boolean    @default(false)
 
   @@index([userId, createdAt])
 }

@@ -2,7 +2,12 @@ import { GoogleGenAI } from '@google/genai';
 import { GeneratedPackSchema, GeneratedPack } from './schemas';
 import { SYSTEM_PROMPT, buildUserPrompt } from './prompts';
 
-export async function generatePack(text: string): Promise<GeneratedPack> {
+export async function generatePack(
+  text: string,
+  generateNotes = true,
+  generateFlashcards = true,
+  generateQuiz = false
+): Promise<GeneratedPack> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
   // Build JSON schema inline to avoid zod-to-json-schema type conflicts with zod v4
@@ -55,8 +60,8 @@ export async function generatePack(text: string): Promise<GeneratedPack> {
   };
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: buildUserPrompt(text),
+    model: 'gemini-3.5-flash-lite',
+    contents: buildUserPrompt(text, generateNotes, generateFlashcards, generateQuiz),
     config: {
       responseMimeType: 'application/json',
       responseJsonSchema: responseSchema as any,
@@ -76,5 +81,10 @@ export async function generatePack(text: string): Promise<GeneratedPack> {
     throw new Error('AI failed to generate valid JSON');
   }
 
-  return GeneratedPackSchema.parse(parsed);
+  const result = GeneratedPackSchema.parse(parsed);
+  // Force empty arrays when generation disabled
+  if (!generateNotes) result.notes = [];
+  if (!generateFlashcards) result.flashcards = [];
+  if (!generateQuiz) result.quiz = [];
+  return result;
 }

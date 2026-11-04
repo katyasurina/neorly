@@ -20,9 +20,9 @@ export const GeneratedQuizSchema = z.object({
 
 export const GeneratedPackSchema = z.object({
   title: z.string(),
-  notes: z.array(GeneratedNoteSchema).min(1),
-  flashcards: z.array(GeneratedFlashcardSchema).min(5),
-  quiz: z.array(GeneratedQuizSchema).min(3),
+  notes: z.array(GeneratedNoteSchema).min(0),
+  flashcards: z.array(GeneratedFlashcardSchema).min(0),
+  quiz: z.array(GeneratedQuizSchema).min(0),
 });
 
 export type GeneratedPack = z.infer<typeof GeneratedPackSchema>;
