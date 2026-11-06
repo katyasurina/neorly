@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
   const generateFlashcards = formData.get('generateFlashcards') === 'true';
   const generateQuiz = formData.get('generateQuiz') === 'true';
   const detailLevel = parseInt(formData.get('detailLevel') as string) || 2;
-  const flashcardsCount = parseInt(formData.get('flashcardsCount') as string) || 10; // Нове поле
+  const flashcardsCount = parseInt(formData.get('flashcardsCount') as string) || 10;
+  const quizCount = parseInt(formData.get('quizCount') as string) || 5; // Нове поле
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: 'Файл не надано' }, { status: 400 });
@@ -84,7 +85,8 @@ export async function POST(request: NextRequest) {
         generateFlashcards,
         generateQuiz,
         detailLevel,
-        flashcardsCount, // Зберігаємо кількість карток
+        flashcardsCount,
+        quizCount, // Зберігаємо кількість тестів
       },
     });
     console.log("Pack created, id:", pack.id);
@@ -129,8 +131,8 @@ export async function POST(request: NextRequest) {
   let aiResult: GeneratedPack;
   console.log("3. AI GENERATION STARTED...");
   try {
-    // Передаємо flashcardsCount у функцію генерації
-    aiResult = await generatePack(text, generateNotes, generateFlashcards, generateQuiz, detailLevel, flashcardsCount);
+    // Передаємо quizCount у функцію генерації
+    aiResult = await generatePack(text, generateNotes, generateFlashcards, generateQuiz, detailLevel, flashcardsCount, quizCount);
   } catch (aiError) {
     console.error("DETAILED PACK ERROR:", aiError);
     await prisma.pack.update({

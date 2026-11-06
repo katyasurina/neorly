@@ -8,7 +8,8 @@ export async function generatePack(
   generateFlashcards = true,
   generateQuiz = false,
   detailLevel = 2, // 1 - коротко, 2 - середньо, 3 - детально
-  flashcardsCount = 10 // Кількість карток
+  flashcardsCount = 10, // Кількість карток
+  quizCount = 5 // Кількість тестових питань
 ): Promise<GeneratedPack> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -73,8 +74,8 @@ export async function generatePack(
 
       const requestPromise = ai.models.generateContent({
         model: 'gemini-3.5-flash-lite',
-        // Передаємо flashcardsCount у промпт
-        contents: buildUserPrompt(text, generateNotes, generateFlashcards, generateQuiz, detailLevel, flashcardsCount),
+        // Передаємо quizCount у промпт
+        contents: buildUserPrompt(text, generateNotes, generateFlashcards, generateQuiz, detailLevel, flashcardsCount, quizCount),
         config: {
           responseMimeType: 'application/json',
           responseJsonSchema: responseSchema as any,

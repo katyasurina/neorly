@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import ReactMarkdown from 'react-markdown';
 import FlashcardCard from '@/components/flashcards/flashcard-card';
+import InteractiveQuiz from '@/components/quiz/interactive-quiz';
 import Link from 'next/link';
 import { Play } from 'lucide-react';
 
@@ -113,32 +114,7 @@ export default async function PackDetailPage({
 
           <TabsContent value="quiz">
             {hasQuiz ? (
-              <div className="space-y-4">
-                {pack.quizQuestions.map((q, idx) => (
-                  <article key={q.id} className="bg-white border border-black/10 p-6 shadow-sm">
-                    <h3 className="text-lg font-bold mb-4">
-                      {idx + 1}. {q.question}
-                    </h3>
-                    <ul className="space-y-2">
-                      {q.options.map((opt, i) => (
-                        <li
-                          key={i}
-                          className={`px-4 py-3 text-sm border ${
-                            i === q.correctIndex
-                              ? 'bg-green-50 border-green-200 text-green-800 font-medium'
-                              : 'bg-gray-50 border-black/5'
-                          }`}
-                        >
-                          {opt}
-                        </li>
-                      ))}
-                    </ul>
-                    {q.explanation && (
-                      <p className="mt-4 text-sm text-gray-500 border-l-2 border-indigo-200 pl-4 py-1">{q.explanation}</p>
-                    )}
-                  </article>
-                ))}
-              </div>
+              <InteractiveQuiz questions={pack.quizQuestions} packId={pack.id} />
             ) : (
               <p className="text-muted-foreground">Тести ще не згенеровано.</p>
             )}

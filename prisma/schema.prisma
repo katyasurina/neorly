@@ -43,6 +43,7 @@ model Pack {
   generateQuiz      Boolean    @default(false)
   detailLevel       Int        @default(2)
   flashcardsCount   Int        @default(10)
+  quizCount         Int        @default(5)
 
   @@index([userId, createdAt])
 }

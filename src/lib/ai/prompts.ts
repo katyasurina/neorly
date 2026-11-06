@@ -10,7 +10,8 @@ export function buildUserPrompt(
   generateFlashcards = true,
   generateQuiz = false,
   detailLevel = 2,
-  flashcardsCount = 10
+  flashcardsCount = 10,
+  quizCount = 5
 ): string {
   let parts: string[] = [];
 
@@ -39,7 +40,8 @@ ${detailInstruction}
   }
 
   if (generateQuiz) {
-    parts.push("Згенеруй тестові питання з 4 варіантами відповіді та поясненням.");
+    // Вказуємо точну кількість тестів
+    parts.push(`Згенеруй рівно ${quizCount} тестових питань з 4 варіантами відповіді та поясненням.`);
   }
 
   if (!generateNotes && !generateFlashcards && !generateQuiz) {

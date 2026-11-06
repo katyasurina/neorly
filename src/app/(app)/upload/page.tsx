@@ -19,6 +19,8 @@ export default function UploadPage() {
   const [detailLevel, setDetailLevel] = useState(2);
   // Стан для кількості карток
   const [flashcardsCount, setFlashcardsCount] = useState("10");
+  // Стан для кількості тестів
+  const [quizCount, setQuizCount] = useState("5");
   
   // Стан для прогресу
   const [progress, setProgress] = useState(0);
@@ -79,6 +81,7 @@ export default function UploadPage() {
     formData.append("generateQuiz", String(generateQuiz));
     formData.append("detailLevel", String(detailLevel));
     formData.append("flashcardsCount", flashcardsCount);
+    formData.append("quizCount", quizCount);
 
     try {
       const res = await fetch("/api/packs", {
@@ -207,22 +210,18 @@ export default function UploadPage() {
           {/* Блок налаштувань */}
           <div className="space-y-6 pt-6 border-t border-black/10">
             
-            {/* Повзунок деталізації (Кастомний) */}
+            {/* Повзунок деталізації */}
             {generateNotes && (
               <div className="space-y-3">
                 <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">03 // Рівень деталізації конспекту</label>
                 
                 <div className="relative w-full h-12 flex items-center justify-between px-4">
-                  {/* Сіра лінія */}
                   <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded-full z-0"></div>
-                  
-                  {/* Заповнена лінія до поточної точки */}
                   <div 
                     className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-indigo-600 rounded-full z-0 transition-all duration-300"
                     style={{ width: `calc(${((detailLevel - 1) / 2) * 100}%)` }}
                   ></div>
 
-                  {/* Три точки */}
                   {[1, 2, 3].map((level) => (
                     <button
                       key={level}
@@ -234,7 +233,6 @@ export default function UploadPage() {
                           : 'border-gray-300 hover:border-indigo-400'
                         }`}
                     >
-                      {/* Внутрішня точка */}
                       <div className={`w-2.5 h-2.5 rounded-full transition-colors ${
                         detailLevel === level ? 'bg-indigo-600' : 'bg-transparent'
                       }`}></div>
@@ -242,7 +240,6 @@ export default function UploadPage() {
                   ))}
                 </div>
 
-                {/* Підписи */}
                 <div className="flex justify-between text-xs text-gray-400 mt-2 px-4">
                   <span className={detailLevel === 1 ? 'text-indigo-600 font-bold' : ''}>Коротко</span>
                   <span className={detailLevel === 2 ? 'text-indigo-600 font-bold' : ''}>Середньо</span>
@@ -270,6 +267,26 @@ export default function UploadPage() {
                     <SelectItem value="15">15 карток</SelectItem>
                     <SelectItem value="20">20 карток (стандарт)</SelectItem>
                     <SelectItem value="25">25 карток (детально)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Вибір кількості тестів */}
+            {generateQuiz && (
+              <div className="space-y-3">
+                <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Кількість тестових питань</label>
+                <Select value={quizCount} onValueChange={setQuizCount}>
+                  <SelectTrigger className="w-full h-12 rounded-none border-black/20 bg-white">
+                    <SelectValue placeholder="Оберіть кількість" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5 питань (швидко)</SelectItem>
+                    <SelectItem value="10">10 питань</SelectItem>
+                    <SelectItem value="15">15 питань</SelectItem>
+                    <SelectItem value="20">20 питань (стандарт)</SelectItem>
+                    <SelectItem value="25">25 питань</SelectItem>
+                    <SelectItem value="30">30 питань (детально)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -3,8 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { BookOpen, Brain, Zap, ArrowRight, TrendingUp, Sparkles } from 'lucide-react';
+import { BookOpen, Brain, Zap, ArrowRight, TrendingUp, Sparkles, RotateCcw, Award } from 'lucide-react';
 import ActivityChart from '@/components/dashboard/activity-chart';
 
 export default async function DashboardPage() {
@@ -24,6 +23,13 @@ export default async function DashboardPage() {
 
   const totalPacks = await prisma.pack.count({ where: { userId: user.id } });
   const totalFlashcards = await prisma.flashcard.count({ where: { pack: { userId: user.id } } });
+  
+  const cardsToReviewCount = await prisma.flashcard.count({
+    where: {
+      pack: { userId: user.id },
+      dueAt: { lte: new Date() },
+    },
+  });
 
   // Рахуємо унікальні дні
   const allPacks = await prisma.pack.findMany({
@@ -41,12 +47,11 @@ export default async function DashboardPage() {
     date.setDate(date.getDate() - i);
     const dateStr = date.toISOString().split('T')[0];
     
-    // Рахуємо кількість пакетів, створених цього дня
     const count = allPacks.filter(p => p.createdAt.toISOString().split('T')[0] === dateStr).length;
     
     chartData.push({
       name: date.toLocaleDateString('uk-UA', { weekday: 'short' }),
-      packs: count, // Тепер показуємо кількість пакетів
+      packs: count,
     });
   }
 
@@ -63,43 +68,59 @@ export default async function DashboardPage() {
         <p className="text-sm text-gray-500">Ось огляд твого навчального прогресу на сьогодні.</p>
       </div>
 
-      {/* Картки зі статистикою */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0 mb-6">
+      {/* Картки зі статистикою (5 карток) */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 shrink-0 mb-6">
         <Card className="bg-white border-black/10 shadow-sm rounded-none">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Всього пакетів</p>
-              <h3 className="text-3xl font-bold text-black">{totalPacks}</h3>
-            </div>
-            <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-2 rounded-full">
               <BookOpen className="w-5 h-5" />
             </div>
+            <h3 className="text-2xl font-bold text-black">{totalPacks}</h3>
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Пакетів</p>
           </CardContent>
         </Card>
 
         <Card className="bg-white border-black/10 shadow-sm rounded-none">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Флешкарток</p>
-              <h3 className="text-3xl font-bold text-black">{totalFlashcards}</h3>
-            </div>
-            <div className="w-10 h-10 bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <div className="w-10 h-10 bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 mb-2 rounded-full">
               <Brain className="w-5 h-5" />
             </div>
+            <h3 className="text-2xl font-bold text-black">{totalFlashcards}</h3>
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Карток</p>
           </CardContent>
         </Card>
 
         <Card className="bg-white border-black/10 shadow-sm rounded-none">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Активних днів</p>
-              <h3 className="text-3xl font-bold text-black">{uniqueDays}</h3>
-            </div>
-            <div className="w-10 h-10 bg-green-50 border border-green-100 flex items-center justify-center text-green-600">
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <div className="w-10 h-10 bg-green-50 border border-green-100 flex items-center justify-center text-green-600 mb-2 rounded-full">
               <TrendingUp className="w-5 h-5" />
             </div>
+            <h3 className="text-2xl font-bold text-black">{uniqueDays}</h3>
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Днів</p>
           </CardContent>
         </Card>
+
+        <Card className="bg-white border-black/10 shadow-sm rounded-none">
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <div className="w-10 h-10 bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-600 mb-2 rounded-full">
+              <Award className="w-5 h-5" />
+            </div>
+            <h3 className="text-2xl font-bold text-black">85%</h3>
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Середній бал</p>
+          </CardContent>
+        </Card>
+
+        <Link href="/review">
+          <Card className="bg-white border-black/10 shadow-sm rounded-none hover:border-red-200 transition-colors cursor-pointer h-full">
+            <CardContent className="p-4 flex flex-col items-center text-center">
+              <div className="w-10 h-10 bg-red-50 border border-red-100 flex items-center justify-center text-red-600 mb-2 rounded-full">
+                <RotateCcw className="w-5 h-5" />
+              </div>
+              <h3 className="text-2xl font-bold text-red-600">{cardsToReviewCount}</h3>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">До повтору</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 flex-1">

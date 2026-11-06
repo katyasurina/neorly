@@ -41,8 +41,20 @@ export default function SwipeStudy({ cards, packId }: { cards: Flashcard[]; pack
     }
   };
 
-  const handleAnswer = (isCorrect: boolean) => {
+  const handleAnswer = async (isCorrect: boolean) => {
+    // Зберігаємо результат
     setResults(prev => [...prev, { card: currentCard, correct: isCorrect }]);
+
+    // Оновлюємо картку в базі (SM-2)
+    try {
+      await fetch(`/api/flashcards/${currentCard.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: isCorrect ? 3 : 1 }), // 3 - Good, 1 - Again
+      });
+    } catch (error) {
+      console.error("Помилка оновлення картки:", error);
+    }
 
     controls.start({
       x: isCorrect ? 500 : -500,
@@ -139,8 +151,8 @@ export default function SwipeStudy({ cards, packId }: { cards: Flashcard[]; pack
             <Button onClick={handleRestart} variant="outline" className="h-12 rounded-lg flex-1 border-black/10 hover:bg-gray-50 font-medium">
               <RotateCcw className="w-4 h-4 mr-2" /> Пройти ще раз
             </Button>
-            <Button onClick={() => router.push(`/library/${packId}`)} className="h-12 rounded-lg bg-indigo-600 hover:bg-indigo-700 flex-1 font-medium text-white">
-              До пакету
+            <Button onClick={() => router.push('/library')} className="h-12 rounded-lg bg-indigo-600 hover:bg-indigo-700 flex-1 font-medium text-white">
+              До бібліотеки
             </Button>
           </div>
         </div>
