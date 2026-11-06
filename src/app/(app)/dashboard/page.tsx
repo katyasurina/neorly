@@ -2,9 +2,10 @@ import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Brain, Zap, ArrowRight, TrendingUp } from 'lucide-react';
+import { BookOpen, Brain, Zap, ArrowRight, TrendingUp, Sparkles } from 'lucide-react';
+import ActivityChart from '@/components/dashboard/activity-chart';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -12,11 +13,10 @@ export default async function DashboardPage() {
 
   if (!user) redirect('/login');
 
-  // Отримуємо статистику з бази
   const packs = await prisma.pack.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
-    take: 3, // Беремо 3 останні
+    take: 3,
     include: {
       _count: { select: { notes: true, flashcards: true, quizQuestions: true } }
     }
@@ -25,92 +25,126 @@ export default async function DashboardPage() {
   const totalPacks = await prisma.pack.count({ where: { userId: user.id } });
   const totalFlashcards = await prisma.flashcard.count({ where: { pack: { userId: user.id } } });
 
+  // Рахуємо унікальні дні
+  const allPacks = await prisma.pack.findMany({
+    where: { userId: user.id },
+    select: { createdAt: true },
+    orderBy: { createdAt: 'asc' }
+  });
+  
+  const uniqueDays = new Set(allPacks.map(p => p.createdAt.toISOString().split('T')[0])).size;
+
+  // Формуємо дані для графіка (останні 7 днів)
+  const chartData = [];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    
+    // Рахуємо кількість пакетів, створених цього дня
+    const count = allPacks.filter(p => p.createdAt.toISOString().split('T')[0] === dateStr).length;
+    
+    chartData.push({
+      name: date.toLocaleDateString('uk-UA', { weekday: 'short' }),
+      packs: count, // Тепер показуємо кількість пакетів
+    });
+  }
+
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
+    <div className="p-6 max-w-6xl mx-auto font-mono h-[calc(100vh-4rem)] flex flex-col">
       
       {/* Привітання */}
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Вітаємо, {user.user_metadata?.full_name || 'Студент'}! 👋</h1>
-        <p className="text-gray-500">Ось огляд твого навчального прогресу на сьогодні.</p>
+      <div className="bg-white border border-black/10 p-6 shadow-sm relative overflow-hidden shrink-0 mb-6">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50"></div>
+        <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
+          <Sparkles className="w-6 h-6 text-indigo-600" />
+          Вітаємо, {user.user_metadata?.full_name || 'Студент'}!
+        </h1>
+        <p className="text-sm text-gray-500">Ось огляд твого навчального прогресу на сьогодні.</p>
       </div>
 
       {/* Картки зі статистикою */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-indigo-50 border-indigo-100">
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700">
-              <BookOpen className="w-6 h-6" />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0 mb-6">
+        <Card className="bg-white border-black/10 shadow-sm rounded-none">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-indigo-900">Всього пакетів</p>
-              <h3 className="text-2xl font-bold text-indigo-900">{totalPacks}</h3>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Всього пакетів</p>
+              <h3 className="text-3xl font-bold text-black">{totalPacks}</h3>
+            </div>
+            <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+              <BookOpen className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center text-blue-700">
-              <Brain className="w-6 h-6" />
-            </div>
+        <Card className="bg-white border-black/10 shadow-sm rounded-none">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-blue-900">Флешкарток</p>
-              <h3 className="text-2xl font-bold text-blue-900">{totalFlashcards}</h3>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Флешкарток</p>
+              <h3 className="text-3xl font-bold text-black">{totalFlashcards}</h3>
+            </div>
+            <div className="w-10 h-10 bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+              <Brain className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-green-50 border-green-100">
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-green-200 flex items-center justify-center text-green-700">
-              <TrendingUp className="w-6 h-6" />
-            </div>
+        <Card className="bg-white border-black/10 shadow-sm rounded-none">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-green-900">Днів поспіль</p>
-              <h3 className="text-2xl font-bold text-green-900">1</h3>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Активних днів</p>
+              <h3 className="text-3xl font-bold text-black">{uniqueDays}</h3>
+            </div>
+            <div className="w-10 h-10 bg-green-50 border border-green-100 flex items-center justify-center text-green-600">
+              <TrendingUp className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Останні пакети */}
-      <div className="pt-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Останні матеріали</h2>
-          <Link href="/library" className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
-            Всі матеріали <ArrowRight className="w-4 h-4" />
-          </Link>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 flex-1">
+        {/* Графік */}
+        <div className="lg:col-span-2 bg-white border border-black/10 p-6 shadow-sm flex flex-col">
+          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Твоя активність</h3>
+          <div className="flex-1 min-h-[200px]">
+            <ActivityChart data={chartData} />
+          </div>
         </div>
 
-        {packs.length === 0 ? (
-          <div className="text-center py-12 border rounded-xl bg-card">
-            <Zap className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium">Тут поки що порожньо</h3>
-            <p className="text-gray-500 mb-4">Завантаж свій перший файл, щоб почати навчання.</p>
-            <Link href="/upload">
-              <Button>Завантажити файл</Button>
+        {/* Останні пакети */}
+        <div className="bg-white border border-black/10 p-6 shadow-sm flex flex-col">
+          <div className="flex justify-between items-center mb-4 border-b border-black/10 pb-2 shrink-0">
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Останні</h2>
+            <Link href="/library" className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+              Всі <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {packs.map((pack) => (
-              <Link key={pack.id} href={`/library/${pack.id}`}>
-                <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg line-clamp-2">{pack.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-2 flex-wrap mt-2 text-xs text-gray-500">
-                      {pack._count.notes > 0 && <span className="bg-gray-100 px-2 py-1 rounded">Конспект</span>}
-                      {pack._count.flashcards > 0 && <span className="bg-gray-100 px-2 py-1 rounded">Картки: {pack._count.flashcards}</span>}
-                      {pack._count.quizQuestions > 0 && <span className="bg-gray-100 px-2 py-1 rounded">Тести: {pack._count.quizQuestions}</span>}
+          
+          <div className="space-y-3 overflow-y-auto">
+            {packs.length === 0 ? (
+              <p className="text-xs text-gray-400 text-center py-4">Порожньо</p>
+            ) : (
+              packs.map((pack) => (
+                <Link key={pack.id} href={`/library/${pack.id}`}>
+                  <div className="p-3 border border-black/5 hover:border-indigo-200 hover:bg-indigo-50/50 transition-colors cursor-pointer">
+                    <h3 className="text-sm font-bold mb-1 line-clamp-1">{pack.title}</h3>
+                    <div className="flex gap-2 flex-wrap text-[10px] text-gray-500 mt-2">
+                      {pack._count.notes > 0 && (
+                        <span className="bg-gray-100 px-1.5 py-0.5 rounded">Конспект</span>
+                      )}
+                      {pack._count.flashcards > 0 && (
+                        <span className="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded">Картки: {pack._count.flashcards}</span>
+                      )}
+                      {pack._count.quizQuestions > 0 && (
+                        <span className="bg-green-50 text-green-600 px-1.5 py-0.5 rounded">Тести: {pack._count.quizQuestions}</span>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
-        )}
+        </div>
       </div>
 
     </div>

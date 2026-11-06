@@ -23,7 +23,7 @@ export default async function PackDetailPage({
 
   if (!pack) {
     return (
-      <div className="p-8">
+      <div className="p-8 font-mono">
         <h2 className="text-2xl font-bold mb-2">Пакет не знайдено</h2>
         <p className="text-muted-foreground">Цей пакет не існує або не належить вам.</p>
       </div>
@@ -32,7 +32,7 @@ export default async function PackDetailPage({
 
   if (pack.status === 'FAILED') {
     return (
-      <div className="p-8">
+      <div className="p-8 font-mono">
         <h2 className="text-2xl font-bold mb-2 text-destructive">Помилка обробки</h2>
         <p className="text-muted-foreground">{pack.errorMessage || 'Невідома помилка.'}</p>
       </div>
@@ -41,7 +41,7 @@ export default async function PackDetailPage({
 
   if (pack.status !== 'READY') {
     return (
-      <div className="p-8">
+      <div className="p-8 font-mono">
         <h2 className="text-2xl font-bold mb-2">Обробка йде...</h2>
         <p className="text-muted-foreground">Статус: {pack.status}</p>
       </div>
@@ -52,95 +52,99 @@ export default async function PackDetailPage({
   const hasFlashcards = Array.isArray(pack.flashcards) && pack.flashcards.length > 0;
   const hasQuiz = Array.isArray(pack.quizQuestions) && pack.quizQuestions.length > 0;
 
-  // Об'єднуємо всі конспекти в один суцільний текст
   const fullNotesContent = hasNotes 
     ? pack.notes.map(note => note.content).join('\n\n') 
     : '';
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">{pack.title}</h1>
+    <div className="min-h-screen bg-[#fafafa] relative p-8 font-mono">
+      {/* Сітка на фоні */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000012_1px,transparent_1px),linear-gradient(to_bottom,#00000012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
 
-      <Tabs defaultValue="notes" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="notes">Конспект</TabsTrigger>
-          <TabsTrigger value="flashcards">Флешкартки</TabsTrigger>
-          <TabsTrigger value="quiz">Тести</TabsTrigger>
-        </TabsList>
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold mb-8">{pack.title}</h1>
 
-        <TabsContent value="notes">
-          {hasNotes ? (
-            <div className="rounded-lg border bg-card p-6 shadow-sm prose prose-sm md:prose-base max-w-none dark:prose-invert">
-              <ReactMarkdown>{fullNotesContent}</ReactMarkdown>
-            </div>
-          ) : (
-            <p className="text-muted-foreground">Конспект ще не згенеровано.</p>
-          )}
-        </TabsContent>
+        <Tabs defaultValue="notes" className="w-full">
+          <TabsList className="mb-8 bg-white border border-black/10 p-1 rounded-none h-auto">
+            <TabsTrigger value="notes" className="rounded-none data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-6 py-2">Конспект</TabsTrigger>
+            <TabsTrigger value="flashcards" className="rounded-none data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-6 py-2">Флешкартки</TabsTrigger>
+            <TabsTrigger value="quiz" className="rounded-none data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-6 py-2">Тести</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="flashcards">
-          {hasFlashcards ? (
-            <div className="space-y-6">
-              {/* Кнопка запуску свайпів */}
-              <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-xl flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-indigo-900">Режим навчання</h3>
-                  <p className="text-sm text-indigo-700/70">Перевірте свої знання за допомогою свайпів.</p>
-                </div>
-                <Link 
-                  href={`/library/${pack.id}/study`} 
-                  className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-3 font-bold rounded-md hover:bg-indigo-700 transition-colors shadow-sm"
-                >
-                  <Play className="w-4 h-4" />
-                  Почати навчання
-                </Link>
+          <TabsContent value="notes">
+            {hasNotes ? (
+              <div className="bg-white border border-black/10 p-8 shadow-sm prose prose-sm md:prose-base max-w-none dark:prose-invert">
+                <ReactMarkdown>{fullNotesContent}</ReactMarkdown>
               </div>
+            ) : (
+              <p className="text-muted-foreground">Конспект ще не згенеровано.</p>
+            )}
+          </TabsContent>
 
-              {/* Сітка карток для перегляду */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                {pack.flashcards.map((card) => (
-                  <FlashcardCard key={card.id} card={card} />
+          <TabsContent value="flashcards">
+            {hasFlashcards ? (
+              <div className="space-y-6">
+                {/* Кнопка запуску свайпів */}
+                <div className="bg-white border border-black/10 p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-indigo-600"></div>
+                  <div>
+                    <h3 className="text-lg font-bold text-black">Режим навчання</h3>
+                    <p className="text-sm text-gray-500">Перевірте свої знання за допомогою свайпів.</p>
+                  </div>
+                  <Link 
+                    href={`/library/${pack.id}/study`} 
+                    className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-3 font-bold hover:bg-indigo-700 transition-colors shadow-sm w-full md:w-auto"
+                  >
+                    <Play className="w-4 h-4" />
+                    Почати навчання
+                  </Link>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {pack.flashcards.map((card) => (
+                    <FlashcardCard key={card.id} card={card} />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">Флешкартки ще не згенеровано.</p>
+            )}
+          </TabsContent>
+
+          <TabsContent value="quiz">
+            {hasQuiz ? (
+              <div className="space-y-4">
+                {pack.quizQuestions.map((q, idx) => (
+                  <article key={q.id} className="bg-white border border-black/10 p-6 shadow-sm">
+                    <h3 className="text-lg font-bold mb-4">
+                      {idx + 1}. {q.question}
+                    </h3>
+                    <ul className="space-y-2">
+                      {q.options.map((opt, i) => (
+                        <li
+                          key={i}
+                          className={`px-4 py-3 text-sm border ${
+                            i === q.correctIndex
+                              ? 'bg-green-50 border-green-200 text-green-800 font-medium'
+                              : 'bg-gray-50 border-black/5'
+                          }`}
+                        >
+                          {opt}
+                        </li>
+                      ))}
+                    </ul>
+                    {q.explanation && (
+                      <p className="mt-4 text-sm text-gray-500 border-l-2 border-indigo-200 pl-4 py-1">{q.explanation}</p>
+                    )}
+                  </article>
                 ))}
               </div>
-            </div>
-          ) : (
-            <p className="text-muted-foreground">Флешкартки ще не згенеровано.</p>
-          )}
-        </TabsContent>
-
-        <TabsContent value="quiz">
-          {hasQuiz ? (
-            <div className="space-y-6">
-              {pack.quizQuestions.map((q, idx) => (
-                <article key={q.id} className="rounded-lg border bg-card p-6 shadow-sm">
-                  <h3 className="text-lg font-semibold mb-4">
-                    {idx + 1}. {q.question}
-                  </h3>
-                  <ul className="space-y-2">
-                    {q.options.map((opt, i) => (
-                      <li
-                        key={i}
-                        className={`rounded-md border px-4 py-3 text-sm ${
-                          i === q.correctIndex
-                            ? 'bg-green-50 border-green-200 text-green-800'
-                            : 'bg-muted'
-                        }`}
-                      >
-                        {opt}
-                      </li>
-                    ))}
-                  </ul>
-                  {q.explanation && (
-                    <p className="mt-3 text-sm text-muted-foreground">{q.explanation}</p>
-                  )}
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">Тести ще не згенеровано.</p>
-          )}
-        </TabsContent>
-      </Tabs>
+            ) : (
+              <p className="text-muted-foreground">Тести ще не згенеровано.</p>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

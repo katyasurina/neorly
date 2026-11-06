@@ -204,27 +204,52 @@ export default function UploadPage() {
             </div>
           </div>
 
-          {/* Блок налаштувань (з'являється залежно від вибору) */}
+          {/* Блок налаштувань */}
           <div className="space-y-6 pt-6 border-t border-black/10">
             
-            {/* Повзунок деталізації */}
+            {/* Повзунок деталізації (Кастомний) */}
             {generateNotes && (
               <div className="space-y-3">
                 <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">03 // Рівень деталізації конспекту</label>
-                <div className="flex items-center gap-4">
-                  <span className={`text-sm ${detailLevel === 1 ? 'font-bold text-indigo-600' : 'text-gray-400'}`}>Коротко</span>
-                  <input 
-                    type="range" 
-                    min="1" 
-                    max="3" 
-                    step="1"
-                    value={detailLevel}
-                    onChange={(e) => setDetailLevel(Number(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                  />
-                  <span className={`text-sm ${detailLevel === 3 ? 'font-bold text-indigo-600' : 'text-gray-400'}`}>Детально</span>
+                
+                <div className="relative w-full h-12 flex items-center justify-between px-4">
+                  {/* Сіра лінія */}
+                  <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded-full z-0"></div>
+                  
+                  {/* Заповнена лінія до поточної точки */}
+                  <div 
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-indigo-600 rounded-full z-0 transition-all duration-300"
+                    style={{ width: `calc(${((detailLevel - 1) / 2) * 100}%)` }}
+                  ></div>
+
+                  {/* Три точки */}
+                  {[1, 2, 3].map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => setDetailLevel(level)}
+                      className={`relative z-10 w-6 h-6 rounded-full border-2 transition-all duration-300 flex items-center justify-center bg-white
+                        ${detailLevel >= level 
+                          ? 'border-indigo-600' 
+                          : 'border-gray-300 hover:border-indigo-400'
+                        }`}
+                    >
+                      {/* Внутрішня точка */}
+                      <div className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                        detailLevel === level ? 'bg-indigo-600' : 'bg-transparent'
+                      }`}></div>
+                    </button>
+                  ))}
                 </div>
-                <p className="text-xs text-gray-500">
+
+                {/* Підписи */}
+                <div className="flex justify-between text-xs text-gray-400 mt-2 px-4">
+                  <span className={detailLevel === 1 ? 'text-indigo-600 font-bold' : ''}>Коротко</span>
+                  <span className={detailLevel === 2 ? 'text-indigo-600 font-bold' : ''}>Середньо</span>
+                  <span className={detailLevel === 3 ? 'text-indigo-600 font-bold' : ''}>Детально</span>
+                </div>
+
+                <p className="text-xs text-gray-500 mt-1">
                   {detailLevel === 1 && "Стислий переказ головних думок."}
                   {detailLevel === 2 && "Збалансований конспект із ключовими термінами."}
                   {detailLevel === 3 && "Розгорнутий конспект із прикладами та деталями."}
