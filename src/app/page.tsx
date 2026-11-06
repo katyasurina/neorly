@@ -55,7 +55,9 @@ export default function Home() {
             <LoadingLink href="/register" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-3 text-base font-bold border border-indigo-700/50 hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/10">
               Start building <ArrowRight className="w-4 h-4" />
             </LoadingLink>
-            <LoadingLink href="/login" className="w-full sm:w-auto inline-flex items-center justify-center border border-black/20 text-black px-6 py-3 text-base font-medium hover:bg-black/5 transition-all">
+            
+            {/* Друга кнопка веде до секції #how */}
+            <LoadingLink href="#how" className="w-full sm:w-auto inline-flex items-center justify-center border border-black/20 text-black px-6 py-3 text-base font-medium hover:bg-black/5 transition-all">
               See how it works
             </LoadingLink>
           </div>

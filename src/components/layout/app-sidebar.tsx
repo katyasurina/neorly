@@ -22,6 +22,7 @@ export function AppSidebar() {
         {/* Логотип веде на головну сторінку */}
         <Link 
           href="/" 
+          prefetch={true}
           className="text-xl font-extrabold tracking-tight text-foreground hover:opacity-80 transition-opacity block"
         >
           Neorly
@@ -36,6 +37,7 @@ export function AppSidebar() {
             <Link
               key={l.href}
               href={l.href}
+              prefetch={true} // <--- ДОДАНО ДЛЯ ШВИДКОСТІ
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
@@ -49,7 +51,11 @@ export function AppSidebar() {
       </nav>
       
       <div className="mt-auto pt-4 border-t">
-        <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground">
+        <Link 
+          href="/" 
+          prefetch={true}
+          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
           <LogOut className="size-4" /> Вийти
         </Link>
       </div>
