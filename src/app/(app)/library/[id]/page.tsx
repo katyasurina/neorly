@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import ReactMarkdown from 'react-markdown';
 import FlashcardCard from '@/components/flashcards/flashcard-card';
+import Link from 'next/link';
+import { Play } from 'lucide-react';
 
 export default async function PackDetailPage({
   params,
@@ -68,7 +70,6 @@ export default async function PackDetailPage({
 
         <TabsContent value="notes">
           {hasNotes ? (
-            // Виводимо весь текст в одному блоці з красивими стилями
             <div className="rounded-lg border bg-card p-6 shadow-sm prose prose-sm md:prose-base max-w-none dark:prose-invert">
               <ReactMarkdown>{fullNotesContent}</ReactMarkdown>
             </div>
@@ -79,10 +80,28 @@ export default async function PackDetailPage({
 
         <TabsContent value="flashcards">
           {hasFlashcards ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {pack.flashcards.map((card) => (
-                <FlashcardCard key={card.id} card={card} />
-              ))}
+            <div className="space-y-6">
+              {/* Кнопка запуску свайпів */}
+              <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-xl flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-indigo-900">Режим навчання</h3>
+                  <p className="text-sm text-indigo-700/70">Перевірте свої знання за допомогою свайпів.</p>
+                </div>
+                <Link 
+                  href={`/library/${pack.id}/study`} 
+                  className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-3 font-bold rounded-md hover:bg-indigo-700 transition-colors shadow-sm"
+                >
+                  <Play className="w-4 h-4" />
+                  Почати навчання
+                </Link>
+              </div>
+
+              {/* Сітка карток для перегляду */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {pack.flashcards.map((card) => (
+                  <FlashcardCard key={card.id} card={card} />
+                ))}
+              </div>
             </div>
           ) : (
             <p className="text-muted-foreground">Флешкартки ще не згенеровано.</p>

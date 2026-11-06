@@ -44,6 +44,8 @@ export async function POST(request: NextRequest) {
   const generateNotes = formData.get('generateNotes') === 'true';
   const generateFlashcards = formData.get('generateFlashcards') === 'true';
   const generateQuiz = formData.get('generateQuiz') === 'true';
+  const detailLevel = parseInt(formData.get('detailLevel') as string) || 2;
+  const flashcardsCount = parseInt(formData.get('flashcardsCount') as string) || 10; // Нове поле
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: 'Файл не надано' }, { status: 400 });
@@ -55,7 +57,8 @@ export async function POST(request: NextRequest) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const path = `${user.id}/${Date.now()}-${file.name}`;
+  const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+  const path = `${user.id}/${Date.now()}-${safeName}`;
 
   console.log("Uploading to storage...");
   const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, buffer, {
@@ -63,10 +66,10 @@ export async function POST(request: NextRequest) {
     upsert: false,
   });
   console.log("File uploaded");
-    if (uploadError) {
+  
+  if (uploadError) {
     console.log("ПОМИЛКА ЗАВАНТАЖЕННЯ:", uploadError);
   }
-  
 
   let pack;
   try {
@@ -80,6 +83,8 @@ export async function POST(request: NextRequest) {
         generateNotes,
         generateFlashcards,
         generateQuiz,
+        detailLevel,
+        flashcardsCount, // Зберігаємо кількість карток
       },
     });
     console.log("Pack created, id:", pack.id);
@@ -124,7 +129,8 @@ export async function POST(request: NextRequest) {
   let aiResult: GeneratedPack;
   console.log("3. AI GENERATION STARTED...");
   try {
-    aiResult = await generatePack(text, generateNotes, generateFlashcards, generateQuiz);
+    // Передаємо flashcardsCount у функцію генерації
+    aiResult = await generatePack(text, generateNotes, generateFlashcards, generateQuiz, detailLevel, flashcardsCount);
   } catch (aiError) {
     console.error("DETAILED PACK ERROR:", aiError);
     await prisma.pack.update({
