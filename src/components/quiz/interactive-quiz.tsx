@@ -26,21 +26,61 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
   const currentQuestion = questions[currentIndex];
 
   const handleSelect = (index: number) => {
-    if (isAnswered) return;
+    if (isAnswered) return; // Якщо вже відповіли, не дозволяємо міняти
     setSelectedOption(index);
     setIsAnswered(true);
 
     const isCorrect = index === currentQuestion.correctIndex;
-    setResults((prev) => [...prev, { question: currentQuestion, selected: index, correct: isCorrect }]);
+    
+    // Оновлюємо результати: перевіряємо, чи вже є відповідь на це питання
+    setResults((prev) => {
+      const existingIndex = prev.findIndex((r) => r.question.id === currentQuestion.id);
+      const newResult = { question: currentQuestion, selected: index, correct: isCorrect };
+      
+      if (existingIndex !== -1) {
+        // Якщо відповідь вже є, оновлюємо її
+        const updated = [...prev];
+        updated[existingIndex] = newResult;
+        return updated;
+      }
+      // Якщо немає, додаємо нову
+      return [...prev, newResult];
+    });
   };
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      setSelectedOption(null);
-      setIsAnswered(false);
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      
+      // Відновлюємо стан для наступного питання (якщо на нього вже відповідали)
+      const nextResult = results.find(r => r.question.id === questions[nextIndex].id);
+      if (nextResult) {
+        setSelectedOption(nextResult.selected);
+        setIsAnswered(true);
+      } else {
+        setSelectedOption(null);
+        setIsAnswered(false);
+      }
     } else {
       setIsFinished(true);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1;
+      setCurrentIndex(prevIndex);
+      
+      // Відновлюємо стан для попереднього питання
+      const prevResult = results.find(r => r.question.id === questions[prevIndex].id);
+      if (prevResult) {
+        setSelectedOption(prevResult.selected);
+        setIsAnswered(true);
+      } else {
+        setSelectedOption(null);
+        setIsAnswered(false);
+      }
     }
   };
 
@@ -200,13 +240,7 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
       <div className="mt-8 flex justify-between items-center pt-6 border-t border-black/10">
         <Button 
           variant="outline" 
-          onClick={() => {
-            if (currentIndex > 0) {
-              setCurrentIndex(currentIndex - 1);
-              setSelectedOption(null);
-              setIsAnswered(false);
-            }
-          }}
+          onClick={handleBack}
           disabled={currentIndex === 0}
           className="rounded-lg border-black/10"
         >
