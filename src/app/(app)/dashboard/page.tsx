@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { BookOpen, Brain, Zap, ArrowRight, TrendingUp, Sparkles, RotateCcw, Award } from 'lucide-react';
 import ActivityChart from '@/components/dashboard/activity-chart';
 
@@ -31,7 +32,6 @@ export default async function DashboardPage() {
     },
   });
 
-  // Рахуємо унікальні дні
   const allPacks = await prisma.pack.findMany({
     where: { userId: user.id },
     select: { createdAt: true },
@@ -40,15 +40,12 @@ export default async function DashboardPage() {
   
   const uniqueDays = new Set(allPacks.map(p => p.createdAt.toISOString().split('T')[0])).size;
 
-  // Формуємо дані для графіка (останні 7 днів)
   const chartData = [];
   for (let i = 6; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
     const dateStr = date.toISOString().split('T')[0];
-    
     const count = allPacks.filter(p => p.createdAt.toISOString().split('T')[0] === dateStr).length;
-    
     chartData.push({
       name: date.toLocaleDateString('uk-UA', { weekday: 'short' }),
       packs: count,
@@ -56,7 +53,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto font-mono h-[calc(100vh-4rem)] flex flex-col">
+    <div className="p-4 md:p-6 max-w-6xl mx-auto font-mono min-h-[calc(100vh-4rem)] flex flex-col">
       
       {/* Привітання */}
       <div className="bg-white border border-black/10 p-6 shadow-sm relative overflow-hidden shrink-0 mb-6">
@@ -68,56 +65,46 @@ export default async function DashboardPage() {
         <p className="text-sm text-gray-500">Ось огляд твого навчального прогресу на сьогодні.</p>
       </div>
 
-      {/* Картки зі статистикою (5 карток) */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 shrink-0 mb-6">
+      {/* Картки зі статистикою (адаптивні) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 shrink-0 mb-6">
         <Card className="bg-white border-black/10 shadow-sm rounded-none">
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-2 rounded-full">
-              <BookOpen className="w-5 h-5" />
+          <CardContent className="p-3 md:p-5 flex flex-col items-center text-center md:items-start md:text-left">
+            <p className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Пакетів</p>
+            <h3 className="text-xl md:text-3xl font-bold text-black mb-2">{totalPacks}</h3>
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+              <BookOpen className="w-4 h-4 md:w-5 md:h-5" />
             </div>
-            <h3 className="text-2xl font-bold text-black">{totalPacks}</h3>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Пакетів</p>
           </CardContent>
         </Card>
 
         <Card className="bg-white border-black/10 shadow-sm rounded-none">
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <div className="w-10 h-10 bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 mb-2 rounded-full">
-              <Brain className="w-5 h-5" />
+          <CardContent className="p-3 md:p-5 flex flex-col items-center text-center md:items-start md:text-left">
+            <p className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Карток</p>
+            <h3 className="text-xl md:text-3xl font-bold text-black mb-2">{totalFlashcards}</h3>
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+              <Brain className="w-4 h-4 md:w-5 md:h-5" />
             </div>
-            <h3 className="text-2xl font-bold text-black">{totalFlashcards}</h3>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Карток</p>
           </CardContent>
         </Card>
 
         <Card className="bg-white border-black/10 shadow-sm rounded-none">
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <div className="w-10 h-10 bg-green-50 border border-green-100 flex items-center justify-center text-green-600 mb-2 rounded-full">
-              <TrendingUp className="w-5 h-5" />
+          <CardContent className="p-3 md:p-5 flex flex-col items-center text-center md:items-start md:text-left">
+            <p className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Днів</p>
+            <h3 className="text-xl md:text-3xl font-bold text-black mb-2">{uniqueDays}</h3>
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-green-50 border border-green-100 flex items-center justify-center text-green-600">
+              <TrendingUp className="w-4 h-4 md:w-5 md:h-5" />
             </div>
-            <h3 className="text-2xl font-bold text-black">{uniqueDays}</h3>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Днів</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-black/10 shadow-sm rounded-none">
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <div className="w-10 h-10 bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-600 mb-2 rounded-full">
-              <Award className="w-5 h-5" />
-            </div>
-            <h3 className="text-2xl font-bold text-black">85%</h3>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Середній бал</p>
-          </CardContent>
-        </Card>
-
-        <Link href="/review">
+        <Link href="/review" className="h-full">
           <Card className="bg-white border-black/10 shadow-sm rounded-none hover:border-red-200 transition-colors cursor-pointer h-full">
-            <CardContent className="p-4 flex flex-col items-center text-center">
-              <div className="w-10 h-10 bg-red-50 border border-red-100 flex items-center justify-center text-red-600 mb-2 rounded-full">
-                <RotateCcw className="w-5 h-5" />
+            <CardContent className="p-3 md:p-5 flex flex-col items-center text-center md:items-start md:text-left">
+              <p className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">До повтору</p>
+              <h3 className="text-xl md:text-3xl font-bold text-red-600 mb-2">{cardsToReviewCount}</h3>
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-red-50 border border-red-100 flex items-center justify-center text-red-600">
+                <RotateCcw className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <h3 className="text-2xl font-bold text-red-600">{cardsToReviewCount}</h3>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">До повтору</p>
             </CardContent>
           </Card>
         </Link>
@@ -125,7 +112,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 flex-1">
         {/* Графік */}
-        <div className="lg:col-span-2 bg-white border border-black/10 p-6 shadow-sm flex flex-col">
+        <div className="lg:col-span-2 bg-white border border-black/10 p-4 md:p-6 shadow-sm flex flex-col">
           <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Твоя активність</h3>
           <div className="flex-1 min-h-[200px]">
             <ActivityChart data={chartData} />
@@ -133,7 +120,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Останні пакети */}
-        <div className="bg-white border border-black/10 p-6 shadow-sm flex flex-col">
+        <div className="bg-white border border-black/10 p-4 md:p-6 shadow-sm flex flex-col">
           <div className="flex justify-between items-center mb-4 border-b border-black/10 pb-2 shrink-0">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Останні</h2>
             <Link href="/library" className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Upload, Library, Brain, BarChart3, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Upload, Library, Brain, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const links = [
@@ -19,7 +19,6 @@ export function AppSidebar() {
   return (
     <aside className="hidden md:flex w-64 flex-col border-r bg-background p-4">
       <div className="mb-8 px-2">
-        {/* Логотип веде на головну сторінку */}
         <Link 
           href="/" 
           prefetch={true}
@@ -37,7 +36,7 @@ export function AppSidebar() {
             <Link
               key={l.href}
               href={l.href}
-              prefetch={true} // <--- ДОДАНО ДЛЯ ШВИДКОСТІ
+              prefetch={true}
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
