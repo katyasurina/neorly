@@ -73,18 +73,14 @@ export default async function PackDetailPage({
             <TabsTrigger value="quiz" className="rounded-none data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-6 py-2">Тести</TabsTrigger>
           </TabsList>
 
-                    <TabsContent value="notes">
+          <TabsContent value="notes">
             {hasNotes ? (
               <div className="space-y-4">
                 <div className="flex justify-end">
-                  {/* Передаємо ID елемента, а не текст */}
-                  <ExportButton title={pack.title} elementId="notes-content" />
+                  {/* Передаємо сирий контент, а не ID */}
+                  <ExportButton title={pack.title} content={fullNotesContent} />
                 </div>
-                {/* Додаємо id="notes-content" до блоку з конспектом */}
-                <div 
-                  id="notes-content" 
-                  className="bg-white border border-black/10 p-8 shadow-sm prose prose-sm md:prose-base max-w-none dark:prose-invert"
-                >
+                <div className="bg-white border border-black/10 p-8 shadow-sm prose prose-sm md:prose-base max-w-none dark:prose-invert">
                   <ReactMarkdown>{fullNotesContent}</ReactMarkdown>
                 </div>
               </div>
@@ -92,6 +88,7 @@ export default async function PackDetailPage({
               <p className="text-muted-foreground">Конспект ще не згенеровано.</p>
             )}
           </TabsContent>
+
           <TabsContent value="flashcards">
             {hasFlashcards ? (
               <div className="space-y-6">

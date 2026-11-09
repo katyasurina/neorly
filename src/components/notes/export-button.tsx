@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 
-// Функція для транслітерації кирилиці в латиницю
 const transliterate = (text: string) => {
   const map: { [key: string]: string } = {
     'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
@@ -17,25 +16,44 @@ const transliterate = (text: string) => {
   return text.split('').map(char => map[char] || char).join('');
 };
 
-export default function ExportButton({ title, elementId }: { title: string, elementId: string }) {
+export default function ExportButton({ title, content }: { title: string, content: string }) {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
     setIsExporting(true);
-    try {
-      const element = document.getElementById(elementId);
-      if (!element) throw new Error("Конспект не знайдено");
+    
+    // Створюємо тимчасовий елемент з правильними стилями (білий фон, відступи)
+    const tempDiv = document.createElement("div");
+    tempDiv.style.position = "absolute";
+    tempDiv.style.left = "-9999px";
+    tempDiv.style.top = "0";
+    tempDiv.style.width = "800px"; // Фіксована ширина для PDF
+    tempDiv.style.backgroundColor = "#ffffff";
+    tempDiv.style.padding = "40px";
+    tempDiv.style.fontFamily = "Arial, sans-serif";
+    tempDiv.style.fontSize = "14px";
+    tempDiv.style.lineHeight = "1.6";
+    tempDiv.style.color = "#333";
+    
+    // Додаємо заголовок та контент (перетворений з Markdown на HTML)
+    tempDiv.innerHTML = `
+      <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">${title}</h1>
+      <div style="text-align: left;">${content}</div>
+    `;
+    
+    document.body.appendChild(tempDiv);
 
-      // Конвертуємо в Canvas
-      const canvas = await html2canvas(element, { 
+    try {
+      const canvas = await html2canvas(tempDiv, { 
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
       });
 
+      document.body.removeChild(tempDiv);
+
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
@@ -62,6 +80,9 @@ export default function ExportButton({ title, elementId }: { title: string, elem
       
       toast.success("Конспект успішно експортовано!");
     } catch (error) {
+      if (document.body.contains(tempDiv)) {
+        document.body.removeChild(tempDiv);
+      }
       console.error(error);
       toast.error("Помилка експорту. Спробуйте ще раз.");
     } finally {
