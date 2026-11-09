@@ -16,41 +16,46 @@ const transliterate = (text: string) => {
   return text.split('').map(char => map[char] || char).join('');
 };
 
-export default function ExportButton({ title, content }: { title: string, content: string }) {
+export default function ExportButton({ title, elementId }: { title: string, elementId: string }) {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
     setIsExporting(true);
-    
-    // Створюємо тимчасовий елемент з правильними стилями (білий фон, відступи)
-    const tempDiv = document.createElement("div");
-    tempDiv.style.position = "absolute";
-    tempDiv.style.left = "-9999px";
-    tempDiv.style.top = "0";
-    tempDiv.style.width = "800px"; // Фіксована ширина для PDF
-    tempDiv.style.backgroundColor = "#ffffff";
-    tempDiv.style.padding = "40px";
-    tempDiv.style.fontFamily = "Arial, sans-serif";
-    tempDiv.style.fontSize = "14px";
-    tempDiv.style.lineHeight = "1.6";
-    tempDiv.style.color = "#333";
-    
-    // Додаємо заголовок та контент (перетворений з Markdown на HTML)
-    tempDiv.innerHTML = `
-      <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">${title}</h1>
-      <div style="text-align: left;">${content}</div>
-    `;
-    
-    document.body.appendChild(tempDiv);
-
     try {
-      const canvas = await html2canvas(tempDiv, { 
+      // Знаходимо ВЖЕ ВІДРЕНДЕРОВАНИЙ HTML-елемент (з тегами h2, strong, ul)
+      const element = document.getElementById(elementId);
+      if (!element) throw new Error("Конспект не знайдено");
+
+      // Клонуємо, щоб додати стилі, не змінюючи сторінку
+      const clone = element.cloneNode(true) as HTMLElement;
+      
+      // Створюємо тимчасовий контейнер з правильними стилями
+      const container = document.createElement("div");
+      container.style.position = "absolute";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = "800px";
+      container.style.backgroundColor = "#ffffff";
+      container.style.padding = "40px";
+      container.style.fontFamily = "Arial, sans-serif";
+      container.style.fontSize = "14px";
+      container.style.lineHeight = "1.6";
+      container.style.color = "#333";
+      
+      // Вставляємо заголовок і відрендерений HTML
+      container.innerHTML = `
+        <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">${title}</h1>
+      `;
+      container.appendChild(clone);
+      document.body.appendChild(container);
+
+      const canvas = await html2canvas(container, { 
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
       });
 
-      document.body.removeChild(tempDiv);
+      document.body.removeChild(container);
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
@@ -63,11 +68,9 @@ export default function ExportButton({ title, content }: { title: string, conten
       let heightLeft = imgHeight;
       let position = 0;
 
-      // Додаємо першу сторінку
       pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
       heightLeft -= pdfHeight;
 
-      // Додаємо наступні сторінки, поки є контент
       while (heightLeft > 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
@@ -80,9 +83,6 @@ export default function ExportButton({ title, content }: { title: string, conten
       
       toast.success("Конспект успішно експортовано!");
     } catch (error) {
-      if (document.body.contains(tempDiv)) {
-        document.body.removeChild(tempDiv);
-      }
       console.error(error);
       toast.error("Помилка експорту. Спробуйте ще раз.");
     } finally {

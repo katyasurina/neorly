@@ -77,10 +77,14 @@ export default async function PackDetailPage({
             {hasNotes ? (
               <div className="space-y-4">
                 <div className="flex justify-end">
-                  {/* Передаємо сирий контент, а не ID */}
-                  <ExportButton title={pack.title} content={fullNotesContent} />
+                  {/* Передаємо ID елемента */}
+                  <ExportButton title={pack.title} elementId="notes-content" />
                 </div>
-                <div className="bg-white border border-black/10 p-8 shadow-sm prose prose-sm md:prose-base max-w-none dark:prose-invert">
+                {/* Додаємо id до блоку з конспектом */}
+                <div 
+                  id="notes-content" 
+                  className="bg-white border border-black/10 p-8 shadow-sm prose prose-sm md:prose-base max-w-none dark:prose-invert"
+                >
                   <ReactMarkdown>{fullNotesContent}</ReactMarkdown>
                 </div>
               </div>
