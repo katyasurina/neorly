@@ -129,3 +129,13 @@
     @apply font-sans;
   }
 }
+
+@media print {
+  @page {
+    margin: 20mm;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
