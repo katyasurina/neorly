@@ -41,29 +41,19 @@ export default function SwipeStudy({ cards, packId }: { cards: Flashcard[]; pack
     }
   };
 
-    const handleAnswer = async (isCorrect: boolean) => {
-    // ЗАХИСТ: Якщо картки вже немає (наприклад, подвійний клік), зупиняємося
+      const handleAnswer = (isCorrect: boolean) => {
+    // ЗАХИСТ: Якщо картки вже немає, зупиняємося
     if (!currentCard) return;
 
-    // Зберігаємо результат
+    // 1. Зберігаємо результат ЛОКАЛЬНО (миттєво)
     setResults(prev => [...prev, { card: currentCard, correct: isCorrect }]);
 
-    // Оновлюємо картку в базі (SM-2)
-    try {
-      await fetch(`/api/flashcards/${currentCard.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating: isCorrect ? 3 : 1 }), // 3 - Good, 1 - Again
-      });
-    } catch (error) {
-      console.error("Помилка оновлення картки:", error);
-    }
-
+    // 2. ЗАПУСКАЄМО АНІМАЦІЮ ВІДРАЗУ (не чекаючи бази)
     controls.start({
       x: isCorrect ? 500 : -500,
       rotate: isCorrect ? 20 : -20,
       opacity: 0,
-      transition: { duration: 0.3 }
+      transition: { duration: 0.2 }
     }).then(() => {
       if (currentIndex < cards.length - 1) {
         setCurrentIndex(prev => prev + 1);
@@ -71,6 +61,14 @@ export default function SwipeStudy({ cards, packId }: { cards: Flashcard[]; pack
         setIsFinished(true);
       }
     });
+
+    // 3. ВІДПРАВЛЯЄМО ЗАПИТ ДО БАЗИ У ФОНІ (ніколи не блокує UI)
+    // Використовуємо .catch, щоб уникнути помилок у консолі, якщо щось піде не так
+    fetch(`/api/flashcards/${currentCard.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating: isCorrect ? 3 : 1 }),
+    }).catch(error => console.error("Помилка оновлення картки в фоні:", error));
   };
 
   const handleRestart = () => {
