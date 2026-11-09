@@ -1,5 +1,11 @@
 "use client";
 
+import html2canvas from 'html2canvas-pro';
+if (typeof window !== 'undefined') {
+  (window as any).html2canvas = html2canvas;
+}
+
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
@@ -46,7 +52,7 @@ export default function ExportButton({ title, elementId }: { title: string, elem
       // Динамічно імпортуємо html2pdf.js
       const html2pdf = (await import("html2pdf.js")).default;
 
-            const opt: any = {
+    const opt: any = {
         margin: 0,
         filename: `${transliterate(title)}_notes.pdf`,
         image: { type: "jpeg", quality: 0.98 },
