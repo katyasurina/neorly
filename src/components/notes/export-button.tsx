@@ -1,15 +1,11 @@
 "use client";
 
-import html2canvas from 'html2canvas-pro';
-if (typeof window !== 'undefined') {
-  (window as any).html2canvas = html2canvas;
-}
-
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas-pro";
 
 const transliterate = (text: string) => {
   const map: { [key: string]: string } = {
@@ -29,41 +25,63 @@ export default function ExportButton({ title, elementId }: { title: string, elem
       const element = document.getElementById(elementId);
       if (!element) throw new Error("Конспект не знайдено");
 
-      // Клонуємо елемент, щоб не змінювати сторінку
       const clone = element.cloneNode(true) as HTMLElement;
-
-      // Створюємо контейнер з правильними стилями
+      
+      // Створюємо контейнер з правильними полями (як на аркуші A4)
       const container = document.createElement("div");
-      container.style.width = "210mm"; // Ширина A4
-      container.style.padding = "20mm"; // Поля з усіх боків
+      container.style.position = "absolute";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = "794px"; // Ширина A4 в пікселях при 96 DPI
       container.style.backgroundColor = "#ffffff";
+      container.style.padding = "75px"; // Поля ~20мм
       container.style.fontFamily = "Arial, sans-serif";
-      container.style.fontSize = "12pt";
+      container.style.fontSize = "14px";
       container.style.lineHeight = "1.6";
       container.style.color = "#333";
-      container.style.boxSizing = "border-box";
-
+      
       container.innerHTML = `
-        <h1 style="font-size: 20pt; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">${title}</h1>
+        <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">${title}</h1>
       `;
       container.appendChild(clone);
       document.body.appendChild(container);
 
-      // Динамічно імпортуємо html2pdf.js
-      const html2pdf = (await import("html2pdf.js")).default;
-
-    const opt: any = {
-        margin: 0,
-        filename: `${transliterate(title)}_notes.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["avoid-all", "css", "legacy"] }
-      };
-
-      await html2pdf().set(opt).from(container).save();
+      const canvas = await html2canvas(container, { 
+        scale: 2, // Висока якість
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
 
       document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL("image/png");
+      
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth(); // 210 мм
+      const pdfHeight = pdf.internal.pageSize.getHeight(); // 297 мм
+      
+      // Розраховуємо, скільки пікселів canvasa вміщується на одній сторінці PDF
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Додаємо першу сторінку
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+
+      // Додаємо наступні сторінки, поки є контент
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      const safeTitle = transliterate(title);
+      pdf.save(`${safeTitle}_notes.pdf`);
+      
       toast.success("Конспект успішно експортовано!");
     } catch (error) {
       console.error(error);
