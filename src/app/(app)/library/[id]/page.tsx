@@ -5,6 +5,7 @@ import FlashcardCard from '@/components/flashcards/flashcard-card';
 import InteractiveQuiz from '@/components/quiz/interactive-quiz';
 import Link from 'next/link';
 import { Play } from 'lucide-react';
+import ExportButton from '@/components/notes/export-button';
 
 export default async function PackDetailPage({
   params,
@@ -72,10 +73,15 @@ export default async function PackDetailPage({
             <TabsTrigger value="quiz" className="rounded-none data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-6 py-2">Тести</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="notes">
+            <TabsContent value="notes">
             {hasNotes ? (
-              <div className="bg-white border border-black/10 p-8 shadow-sm prose prose-sm md:prose-base max-w-none dark:prose-invert">
-                <ReactMarkdown>{fullNotesContent}</ReactMarkdown>
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <ExportButton title={pack.title} content={fullNotesContent} />
+                </div>
+                <div className="bg-white border border-black/10 p-8 shadow-sm prose prose-sm md:prose-base max-w-none dark:prose-invert">
+                  <ReactMarkdown>{fullNotesContent}</ReactMarkdown>
+                </div>
               </div>
             ) : (
               <p className="text-muted-foreground">Конспект ще не згенеровано.</p>
