@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 
 export default function ExportButton({ title, content }: { title: string, content: string }) {
   const [isExporting, setIsExporting] = useState(false);
