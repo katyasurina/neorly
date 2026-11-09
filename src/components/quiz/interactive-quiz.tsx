@@ -26,24 +26,21 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
   const currentQuestion = questions[currentIndex];
 
   const handleSelect = (index: number) => {
-    if (isAnswered) return; // Якщо вже відповіли, не дозволяємо міняти
+    if (isAnswered) return;
     setSelectedOption(index);
     setIsAnswered(true);
 
     const isCorrect = index === currentQuestion.correctIndex;
     
-    // Оновлюємо результати: перевіряємо, чи вже є відповідь на це питання
     setResults((prev) => {
       const existingIndex = prev.findIndex((r) => r.question.id === currentQuestion.id);
       const newResult = { question: currentQuestion, selected: index, correct: isCorrect };
       
       if (existingIndex !== -1) {
-        // Якщо відповідь вже є, оновлюємо її
         const updated = [...prev];
         updated[existingIndex] = newResult;
         return updated;
       }
-      // Якщо немає, додаємо нову
       return [...prev, newResult];
     });
   };
@@ -53,7 +50,6 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
       
-      // Відновлюємо стан для наступного питання (якщо на нього вже відповідали)
       const nextResult = results.find(r => r.question.id === questions[nextIndex].id);
       if (nextResult) {
         setSelectedOption(nextResult.selected);
@@ -72,7 +68,6 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
       const prevIndex = currentIndex - 1;
       setCurrentIndex(prevIndex);
       
-      // Відновлюємо стан для попереднього питання
       const prevResult = results.find(r => r.question.id === questions[prevIndex].id);
       if (prevResult) {
         setSelectedOption(prevResult.selected);
@@ -100,26 +95,26 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
 
     if (showMistakes) {
       return (
-        <div className="max-w-2xl mx-auto p-8 font-mono h-[calc(100vh-4rem)] overflow-y-auto">
-          <div className="flex items-center gap-4 mb-10">
+        <div className="max-w-2xl mx-auto p-6 font-mono h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="flex items-center gap-4 mb-8">
             <Button onClick={() => setShowMistakes(false)} variant="outline" className="rounded-lg border-black/10 hover:bg-gray-50">
               <ArrowLeft className="w-4 h-4 mr-2" /> Назад
             </Button>
-            <h1 className="text-2xl font-medium tracking-tight">Твої помилки ({incorrectCount})</h1>
+            <h1 className="text-xl font-medium tracking-tight">Твої помилки ({incorrectCount})</h1>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-4">
             {results.filter(r => !r.correct).map((item, idx) => (
-              <div key={idx} className="bg-white border border-black/5 p-6 rounded-xl shadow-sm">
-                <h3 className="text-base font-medium mb-4 text-gray-900 leading-relaxed">{item.question.question}</h3>
-                <div className="text-sm text-red-600 mb-2">Твоя відповідь: {item.question.options[item.selected]}</div>
-                <div className="text-sm text-green-600">Правильна відповідь: {item.question.options[item.question.correctIndex]}</div>
+              <div key={idx} className="bg-white border border-black/5 p-4 rounded-xl shadow-sm">
+                <h3 className="text-sm font-medium mb-3 text-gray-900 leading-relaxed">{item.question.question}</h3>
+                <div className="text-xs text-red-600 mb-1">Твоя відповідь: {item.question.options[item.selected]}</div>
+                <div className="text-xs text-green-600">Правильна відповідь: {item.question.options[item.question.correctIndex]}</div>
               </div>
             ))}
           </div>
           
-          <div className="mt-12 flex justify-center pb-12">
-            <Button onClick={handleRestart} className="h-12 px-8 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium">
+          <div className="mt-8 flex justify-center pb-8">
+            <Button onClick={handleRestart} className="h-10 px-6 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm">
               <RotateCcw className="w-4 h-4 mr-2" /> Пройти ще раз
             </Button>
           </div>
@@ -128,44 +123,44 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
     }
 
     return (
-      <div className="max-w-2xl mx-auto p-8 text-center font-mono h-[calc(100vh-4rem)] flex flex-col justify-center overflow-hidden">
-        <h1 className="text-3xl font-medium mb-3">Тест завершено!</h1>
-        <p className="text-sm text-gray-500 mb-16">Ось твої результати.</p>
+      <div className="max-w-2xl mx-auto p-6 text-center font-mono h-[calc(100vh-4rem)] flex flex-col justify-center overflow-hidden">
+        <h1 className="text-2xl font-medium mb-2">Тест завершено!</h1>
+        <p className="text-xs text-gray-500 mb-10">Ось твої результати.</p>
         
-        <div className="flex justify-center gap-16 mb-16">
+        <div className="flex justify-center gap-12 mb-10">
           <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-2xl bg-green-50 border-2 border-green-500 flex items-center justify-center text-green-600 mb-4">
-              <Check className="w-10 h-10" />
+            <div className="w-20 h-20 rounded-2xl bg-green-50 border-2 border-green-500 flex items-center justify-center text-green-600 mb-3">
+              <Check className="w-8 h-8" />
             </div>
-            <span className="text-3xl font-semibold">{correctCount} з {questions.length}</span>
-            <span className="text-xs text-gray-500 uppercase tracking-widest mt-2">Правильних</span>
+            <span className="text-2xl font-semibold">{correctCount} з {questions.length}</span>
+            <span className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Правильних</span>
           </div>
           
           <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-2xl bg-red-50 border-2 border-red-500 flex items-center justify-center text-red-600 mb-4">
-              <X className="w-10 h-10" />
+            <div className="w-20 h-20 rounded-2xl bg-red-50 border-2 border-red-500 flex items-center justify-center text-red-600 mb-3">
+              <X className="w-8 h-8" />
             </div>
-            <span className="text-3xl font-semibold">{incorrectCount}</span>
-            <span className="text-xs text-gray-500 uppercase tracking-widest mt-2">Помилок</span>
+            <span className="text-2xl font-semibold">{incorrectCount}</span>
+            <span className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Помилок</span>
           </div>
         </div>
 
-        <div className="text-4xl font-bold mb-12 text-indigo-600">{percentage}%</div>
+        <div className="text-3xl font-bold mb-8 text-indigo-600">{percentage}%</div>
 
-        <div className="flex flex-col gap-3 w-full max-w-sm mx-auto">
+        <div className="flex flex-col gap-2 w-full max-w-xs mx-auto">
           {incorrectCount > 0 && (
             <Button 
               onClick={() => setShowMistakes(true)} 
-              className="h-12 rounded-lg bg-white border-2 border-red-100 text-red-600 hover:bg-red-50 hover:border-red-200 w-full font-medium transition-colors"
+              className="h-10 rounded-lg bg-white border-2 border-red-100 text-red-600 hover:bg-red-50 hover:border-red-200 w-full font-medium transition-colors text-sm"
             >
               <BookOpen className="w-4 h-4 mr-2" /> Переглянути помилки
             </Button>
           )}
-          <div className="flex gap-3 w-full">
-            <Button onClick={handleRestart} variant="outline" className="h-12 rounded-lg flex-1 border-black/10 hover:bg-gray-50 font-medium">
+          <div className="flex gap-2 w-full">
+            <Button onClick={handleRestart} variant="outline" className="h-10 rounded-lg flex-1 border-black/10 hover:bg-gray-50 font-medium text-sm">
               <RotateCcw className="w-4 h-4 mr-2" /> Пройти ще раз
             </Button>
-            <Button onClick={() => router.push(`/library/${packId}`)} className="h-12 rounded-lg bg-indigo-600 hover:bg-indigo-700 flex-1 font-medium text-white">
+            <Button onClick={() => router.push(`/library/${packId}`)} className="h-10 rounded-lg bg-indigo-600 hover:bg-indigo-700 flex-1 font-medium text-white text-sm">
               До пакету
             </Button>
           </div>
@@ -175,8 +170,8 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-8 font-mono h-[calc(100vh-4rem)] flex flex-col">
-      <div className="w-full h-1 bg-gray-100 mb-8 rounded-full overflow-hidden">
+    <div className="max-w-2xl mx-auto p-6 font-mono h-[calc(100vh-4rem)] flex flex-col">
+      <div className="w-full h-1 bg-gray-100 mb-6 rounded-full overflow-hidden">
         <div 
           className="h-full bg-indigo-500 transition-all duration-300 ease-out"
           style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
@@ -184,18 +179,18 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
       </div>
 
       <div className="flex-1 flex flex-col justify-center">
-        <div className="mb-8">
-          <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+        <div className="mb-6">
+          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
             Питання {currentIndex + 1} з {questions.length}
           </div>
-          <h2 className="text-xl md:text-2xl font-medium text-gray-900 leading-snug">
+          <h2 className="text-lg md:text-xl font-medium text-gray-900 leading-snug">
             {currentQuestion.question}
           </h2>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {currentQuestion.options.map((option, index) => {
-            let buttonClass = "w-full text-left p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between ";
+            let buttonClass = "w-full text-left p-3 rounded-xl border-2 transition-all duration-200 flex items-center justify-between ";
             
             if (!isAnswered) {
               buttonClass += "border-black/10 bg-white hover:border-indigo-300 hover:bg-indigo-50/30";
@@ -214,12 +209,12 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
                 disabled={isAnswered}
                 className={buttonClass}
               >
-                <span className="font-medium">{option}</span>
+                <span className="font-medium text-sm">{option}</span>
                 {isAnswered && index === currentQuestion.correctIndex && (
-                  <Check className="w-5 h-5 text-green-600 shrink-0 ml-4" />
+                  <Check className="w-4 h-4 text-green-600 shrink-0 ml-3" />
                 )}
                 {isAnswered && index === selectedOption && index !== currentQuestion.correctIndex && (
-                  <X className="w-5 h-5 text-red-600 shrink-0 ml-4" />
+                  <X className="w-4 h-4 text-red-600 shrink-0 ml-3" />
                 )}
               </button>
             );
@@ -230,19 +225,19 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 p-4 bg-gray-50 border-l-2 border-indigo-500 text-sm text-gray-600"
+            className="mt-4 p-3 bg-gray-50 border-l-2 border-indigo-500 text-xs text-gray-600"
           >
             {currentQuestion.explanation}
           </motion.div>
         )}
       </div>
 
-      <div className="mt-8 flex justify-between items-center pt-6 border-t border-black/10">
+      <div className="mt-6 flex justify-between items-center pt-4 border-t border-black/10">
         <Button 
           variant="outline" 
           onClick={handleBack}
           disabled={currentIndex === 0}
-          className="rounded-lg border-black/10"
+          className="rounded-lg border-black/10 h-9 text-sm"
         >
           <ArrowLeft className="w-4 h-4 mr-2" /> Назад
         </Button>
@@ -250,7 +245,7 @@ export default function InteractiveQuiz({ questions, packId }: { questions: Quiz
         <Button 
           onClick={handleNext}
           disabled={!isAnswered}
-          className="rounded-lg bg-indigo-600 hover:bg-indigo-700 font-medium px-8 text-white"
+          className="rounded-lg bg-indigo-600 hover:bg-indigo-700 font-medium px-6 text-white h-9 text-sm"
         >
           {currentIndex === questions.length - 1 ? "Завершити" : "Далі"}
           <ArrowRight className="w-4 h-4 ml-2" />
