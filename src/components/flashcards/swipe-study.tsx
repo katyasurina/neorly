@@ -41,7 +41,10 @@ export default function SwipeStudy({ cards, packId }: { cards: Flashcard[]; pack
     }
   };
 
-  const handleAnswer = async (isCorrect: boolean) => {
+    const handleAnswer = async (isCorrect: boolean) => {
+    // ЗАХИСТ: Якщо картки вже немає (наприклад, подвійний клік), зупиняємося
+    if (!currentCard) return;
+
     // Зберігаємо результат
     setResults(prev => [...prev, { card: currentCard, correct: isCorrect }]);
 
