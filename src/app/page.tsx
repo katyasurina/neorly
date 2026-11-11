@@ -14,9 +14,10 @@ export default function Home() {
       {/* Навігація */}
       <header className="fixed top-0 w-full z-50 border-b border-black/10 bg-[#fafafa]/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-xl tracking-tight">
-            <span className="text-indigo-600 text-2xl font-black">N</span> Neorly
-          </div>
+          <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity">
+          <img src="/logo.svg" alt="Neorly Logo" className="w-8 h-8" />
+          <span>Neorly</span>
+          </Link>
           <nav className="hidden md:flex gap-8 text-sm font-medium text-gray-500">
             <Link href="#features" className="hover:text-black transition">Features</Link>
             <Link href="#how" className="hover:text-black transition">How it works</Link>
