@@ -22,11 +22,15 @@ export function AppSidebar() {
         <Link 
           href="/" 
           prefetch={true}
-          className="text-xl font-extrabold tracking-tight text-foreground hover:opacity-80 transition-opacity block"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
-          Neorly
+          {/* Додаємо картинку логотипу */}
+          <img src="/logo.svg" alt="Neorly Logo" className="w-8 h-8" />
+          <span className="text-xl font-extrabold tracking-tight text-foreground">
+            Neorly
+          </span>
         </Link>
-        <p className="text-xs text-muted-foreground">AI-помічник для навчання</p>
+        <p className="text-xs text-muted-foreground mt-1">AI-помічник для навчання</p>
       </div>
       
       <nav className="flex-1 space-y-1">

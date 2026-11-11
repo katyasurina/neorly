@@ -54,10 +54,15 @@ export function AppHeader() {
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-4">
               <div className="mb-8 px-2">
-                <Link href="/" className="text-xl font-extrabold tracking-tight text-foreground">
-                  Neorly
+                <Link 
+                  href="/" 
+                  className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-foreground"
+                >
+                  {/* Замінили текст на картинку */}
+                  <img src="/logo.svg" alt="Neorly Logo" className="w-6 h-6" />
+                  <span>Neorly</span>
                 </Link>
-                <p className="text-xs text-muted-foreground">AI-помічник для навчання</p>
+                <p className="text-xs text-muted-foreground mt-1">AI-помічник для навчання</p>
               </div>
               <nav className="flex flex-col space-y-1">
                 {links.map((l) => {
