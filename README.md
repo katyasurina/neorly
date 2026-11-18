@@ -8,7 +8,10 @@
   <br />
   <br />
 
-  <h1>🧠 Neorly</h1>
+  <div align="center">
+  <img src="public/logo.svg" alt="Neorly Logo" width="60" height="60" />
+  <h1>Neorly</h1>
+</div>
   <p><strong>AI-помічник для навчання: перетворюй PDF на конспекти, картки та тести</strong></p>
 
   <p>
